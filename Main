@@ -31,15 +31,6 @@ while (1)
 
 /****************************************/
 // Interrupt routines
-ISR(PCINT2_vect) {
-	if (!(PIND & (1 << PIND2))) {
-	enviar('H');
-	enviar('o');
-	enviar('l');
-	enviar('a');
-	}
-}
-
 ISR(USART_RX_vect) {
 	caracter = UDR0;  // Lee el carácter recibido
 	if(seleccion ==0){
