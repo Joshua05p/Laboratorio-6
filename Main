@@ -1,0 +1,91 @@
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <stdlib.h>
+#include "INTaCHAR.h"
+
+/****************************************/
+// Function prototypes
+uint8_t valor_adc = 0;
+char caracter;
+char buffer[10];
+uint8_t seleccion = 0;
+
+/****************************************/
+// Main Function
+int main(void) {
+	setup();
+	iniciar_USART(103);
+	iniciar_adc();
+	iniciar_conversion();
+	cadena("Ingrese una opcion: \n1. Leer el potenciometro \n2. Leer ASCII\n");
+
+while (1)
+{
+}
+}
+
+/****************************************/
+// NON-Interrupt subroutines
+
+
+
+/****************************************/
+// Interrupt routines
+ISR(PCINT2_vect) {
+	if (!(PIND & (1 << PIND2))) {
+	enviar('H');
+	enviar('o');
+	enviar('l');
+	enviar('a');
+	}
+}
+
+ISR(USART_RX_vect) {
+	caracter = UDR0;  // Lee el carácter recibido
+	if(seleccion ==0){
+			switch(caracter){
+				case('1'):
+				//Leer potenciometro de ADC
+				
+				itoa(valor_adc, buffer, 10);
+				cadena("Valor ADC: ");
+				cadena(buffer);
+				enviar('\n');
+				cadena("/****************************************/\n");
+				cadena("Ingrese una opcion: \n1. Leer el potenciometro \n2. Leer ASCII\n");
+				
+				//cadena("/****************************************/\n");
+				//cadena("El valor del potenciometro es: ");
+				//convertir(valor_adc);
+				//cadena("\n");
+				
+				break;
+				case('2'):
+				//Enviar ASCII
+				cadena("/****************************************/\n");
+				cadena("ENVIE UN CARACTER\n");
+				seleccion = 1;
+				break;
+				default:
+				cadena("/****************************************/\n");
+				cadena("El valor ingresado no es una opcion.\n");
+				cadena("/****************************************/\n");
+				cadena("Ingrese una opcion: \n1. Leer el potenciometro \n2. Leer ASCII\n");
+				break;
+			}
+	}
+	else if(seleccion == 1){
+		PORTB = (caracter >> 3);
+		PORTD = (PORTD & 0b11000111) | (caracter << 3);
+		seleccion = 0;
+		cadena("/****************************************/\n");
+		cadena("Ingrese una opcion: \n1. Leer el potenciometro \n2. Leer ASCII\n");
+	}
+
+
+}
+
+ISR(ADC_vect){
+	valor_adc = (ADC * 255UL) / 1023;
+	iniciar_conversion();
+}
